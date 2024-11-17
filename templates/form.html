@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Performance Prediction</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.3/dist/apexcharts.css">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333333;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555555;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: #007bff;
+      color: #ffffff;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    /* Chart Section */
+    .chart-container {
+      margin-top: 40px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-title {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      color: #1A56DB;
+      text-align: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        max-width: 100%;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Student Performance Prediction</h1>
+    <form action="/predict" method="POST">
+      <div class="form-group">
+        <label for="reading_score">Reading Score:</label>
+        <input type="number" id="reading_score" name="reading_score" required>
+      </div>
+      <div class="form-group">
+        <label for="writing_score">Writing Score:</label>
+        <input type="number" id="writing_score" name="writing_score" required>
+      </div>
+      <div class="form-group">
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="race_ethnicity">Race/Ethnicity:</label>
+        <select id="race_ethnicity" name="race_ethnicity" required>
+          <option value="Group A">Group A</option>
+          <option value="Group B">Group B</option>
+          <option value="Group C">Group C</option>
+          <option value="Group D">Group D</option>
+          <option value="Group E">Group E</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="parental_level_of_education">Parental Level of Education:</label>
+        <select id="parental_level_of_education" name="parental_level_of_education" required>
+          <option value="High School">High School</option>
+          <option value="Associate's Degree">Associate's Degree</option>
+          <option value="Bachelor's Degree">Bachelor's Degree</option>
+          <option value="Master's Degree">Master's Degree</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="lunch">Lunch:</label>
+        <select id="lunch" name="lunch" required>
+          <option value="Standard">Standard</option>
+          <option value="Free/Reduced">Free/Reduced</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="test_preparation_course">Test Preparation Course:</label>
+        <select id="test_preparation_course" name="test_preparation_course" required>
+          <option value="Completed">Completed</option>
+          <option value="None">None</option>
+        </select>
+      </div>
+      <button type="submit">Predict</button>
+    </form>
+  </div>
+
+  <!-- Prediction Charts Section -->
+  <div class="container">
+    <div class="chart-container">
+      <div class="chart-title">Predicted vs Actual Performance</div>
+      <div id="performance-chart"></div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">Performance by Parental Education Level</div>
+      <div id="education-level-chart"></div>
+    </div>
+  </div>
+
+  <script>
+    // Predicted vs Actual Performance Chart
+    window.addEventListener("load", function () {
+      const performanceChartOptions = {
+        series: [
+          { name: 'Predicted', data: [85, 92, 78, 88, 95], color: "#1A56DB" },
+          { name: 'Actual', data: [87, 90, 80, 85, 94], color: "#7E3BF2" },
+        ],
+        chart: {
+          type: 'area',
+          height: 320,
+        },
+        xaxis: {
+          categories: ['Student 1', 'Student 2', 'Student 3', 'Student 4', 'Student 5'],
+        },
+        yaxis: {
+          labels: { formatter: (value) => value + ' %' },
+        },
+      };
+      const performanceChart = new ApexCharts(document.querySelector("#performance-chart"), performanceChartOptions);
+      performanceChart.render();
+    });
+
+    // Performance by Parental Education Level Chart
+    window.addEventListener("load", function () {
+      const educationLevelOptions = {
+        series: [{
+          name: "Performance",
+          data: [
+            { x: "High School", y: 80 },
+            { x: "Associate's Degree", y: 85 },
+            { x: "Bachelor's Degree", y: 90 },
+            { x: "Master's Degree", y: 95 },
+          ],
+        }],
+        chart: {
+          type: "bar",
+          height: 320,
+        },
+        plotOptions: {
+          bar: {
+            columnWidth: "70%",
+            borderRadius: 8,
+          },
+        },
+        colors: ['#1A56DB'],
+      };
+      const educationLevelChart = new ApexCharts(document.querySelector("#education-level-chart"), educationLevelOptions);
+      educationLevelChart.render();
+    });
+  </script>
+
+</body>
+</html>
